@@ -8,10 +8,10 @@ clear all
 
 simTime = 20; 
 
-T = 0.3; 
+T = 0.18; 
 emulation = T;
 
-l = 1; 
+l = 2; 
 r = 2;
 
 
@@ -36,7 +36,7 @@ b       = 1.05*a;
 pathType = 1;  % pathType 1 for circle, 2 for Casini oval;
 refType = 1;   % specify type of velocity ref 1 for step changes, 2 for ramp
 
-v0 = 2; 
+v0 = 1; 
 v_ref = 2; 
 ref0 = [0 0]';
 m = 0.1;
@@ -69,7 +69,8 @@ end
 %--------------------------- SIMULATION ------------------------------%
 %---------------------------------------------------------------------%
 
-out = sim('Ackeraman.slx');
+% out = sim('Ackeraman.slx');
+out = sim('AcermanDynExt.slx');
 
 
 t = 0:10^-3:simTime;
@@ -144,7 +145,7 @@ for k = 1:50:size(x,1)
     ylabel('$y$-position (m)','interpreter','latex','FontSize',fontsize_labels);
     xlabel('$x$-position (m)','interpreter','latex','FontSize',fontsize_labels);
     legend([c e mr sd],'Continuous time','Emulation', 'MR Sampling','SR Sampling' ,'latex','FontSize',fontsize_labels);
-    axis([-3 3 -3 3])
+    axis([-5 5 -5 5])
     pause(0.05)
     box on;
     grid on
