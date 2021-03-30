@@ -8,7 +8,7 @@ clear all
 
 simTime = 20; 
 
-T = 0.18; 
+T = 0.15; 
 emulation = T;
 
 l = 2; 
@@ -77,10 +77,25 @@ t = 0:10^-3:simTime;
 
 Draw_traj(out.x,out.y,out.theta, out.xe,out.ye,out.thetae,...
     out.xmr, out.ymr,out.thetamr, out.xsd, out.ysd,out.thetasd,...
-    out.xmr_delta, out.ymr_delta,out.thetamr_delta);
+    out.xmr_delta, out.ymr_delta,out.thetamr_delta, T);
    
 figure 
-subplot(2,1,1);
+
+subplot(3,1,1);
+
+plot(out.x, out.y, 'k','LineWidth', 2);
+hold on; grid on;
+plot(out.xe, out.ye, 'r--','LineWidth', 2);
+plot(out.xmr, out.ymr, 'b','LineWidth', 2);
+plot(out.xmr_delta, out.ymr_delta, 'g','LineWidth', 2);
+plot(out.xsd, out.ysd,'color','#D95319','LineWidth', 2);
+l = legend('Continuous-time', 'Emulation', 'MR Sampling',  'MR Sampling $y^\delta$', 'SR Sampling');
+set(l,'Interpreter','Latex'); l.FontSize = 20;
+l = xlabel('Time (s)'); 
+set(l,'Interpreter','Latex'); l.FontSize = 20;
+
+
+subplot(3,1,2);
 
 plot(t, out.v, 'k','LineWidth', 2);
 hold on; grid on;
@@ -92,7 +107,7 @@ set(l,'Interpreter','Latex'); l.FontSize = 20;
 l = xlabel('Time (s)'); 
 set(l,'Interpreter','Latex'); l.FontSize = 20;
 
-subplot(2,1,2);
+subplot(3,1,3);
 
 plot(t, out.w, 'k','LineWidth', 2);
 hold on; grid on;
@@ -108,7 +123,7 @@ set(l,'Interpreter','Latex'); l.FontSize = 20;
 
 function Draw_traj(x,y,theta,...
                    xe,ye, thetae, xmr, ymr,thetamr,...
-                   xsd, ysd,thetasd, xmr_delta, ymr_delta, thetamr_delta)
+                   xsd, ysd,thetasd, xmr_delta, ymr_delta, thetamr_delta, T)
 
 
 set(0,'DefaultAxesFontName', 'Times New Roman')
@@ -137,44 +152,53 @@ for k = 1:50:size(x,1)
     x_c_1 = [x_c_1 x1]; x_e_1 = [x_e_1 xe1]; x_mr_1 = [x_mr_1 xmr1]; x_sd_1 = [x_sd_1 xsd1];
     y_c_1 = [y_c_1 y1]; y_e_1 = [y_e_1 ye1]; y_mr_1 = [y_mr_1 ymr1]; y_sd_1 = [y_sd_1 ysd1];
     xmr_delta_1 = [xmr_delta_1 xmr_delta1];  ymr_delta_1 = [ymr_delta_1 ymr_delta1];
+    
+    
     scatter(x(1),y(1),'k','diamond', 'LineWidth', 5);
     hold on;
+
     c = plot(x_c_1,y_c_1,'-k','linewidth',line_width);hold on % 
     M=[cos(theta1) -sin(theta1) x1; sin(theta1) cos(theta1)  y1;0 0 1]; 
     vertices_unicycle_shape_0=(M*vertices_unicycle_shape)';
     vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
     patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
     'FaceColor','k','EdgeColor','k','EraseMode','none');
+
     e = plot(x_e_1,y_e_1,'-r','linewidth',line_width);    
     Me=[cos(thetae1) -sin(thetae1) xe1; sin(thetae1) cos(thetae1)  ye1;0 0 1]; 
     vertices_unicycle_shape_0=(Me*vertices_unicycle_shape)';
     vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
     patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
     'FaceColor','r','EdgeColor','k','EraseMode','none');
+    
     mr = plot(x_mr_1,y_mr_1,'-b','linewidth',line_width);    
     Mmr=[cos(thetamr1) -sin(thetamr1) xmr1; sin(thetamr1) cos(thetamr1)  ymr1;0 0 1]; 
     vertices_unicycle_shape_0=(Mmr*vertices_unicycle_shape)';
     vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
     patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
     'FaceColor','b','EdgeColor','k','EraseMode','none');
+    
     mrd = plot(xmr_delta_1,ymr_delta_1,'-g','linewidth',line_width);    
     Mmrd=[cos(thetamr_delta1) -sin(thetamr_delta1) xmr_delta1; sin(thetamr_delta1) cos(thetamr_delta1)  ymr_delta1;0 0 1]; 
     vertices_unicycle_shape_0=(Mmrd*vertices_unicycle_shape)';
     vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
     patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
     'FaceColor','g','EdgeColor','k','EraseMode','none');
+    
     sd = plot(x_sd_1,y_sd_1,'color','#D95319','linewidth',line_width);    
     Msd=[cos(thetasd1) -sin(thetasd1) xsd1; sin(thetasd1) cos(thetasd1)  ysd1;0 0 1]; 
     vertices_unicycle_shape_0=(Msd*vertices_unicycle_shape)';
     vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
     patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
     'FaceColor','#D95319','EdgeColor','k','EraseMode','none');
+    
     hold off
+    
     ylabel('$y$-position (m)','interpreter','latex','FontSize',fontsize_labels);
     xlabel('$x$-position (m)','interpreter','latex','FontSize',fontsize_labels);
     legend([c e mr mrd sd],'Continuous time','Emulation', 'MR Sampling', 'MR Sampling $y^\delta$','SR Sampling' ,'latex','FontSize',fontsize_labels);
     axis([-5 5 -5 5])
-    pause(0.05)
+    pause(T/2)
     box on;
     grid on
     drawnow
