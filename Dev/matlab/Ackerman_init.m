@@ -75,7 +75,9 @@ out = sim('AcermanDynExt.slx');
 
 t = 0:10^-3:simTime;
 
-Draw_traj(out.x,out.y,out.xe,out.ye, out.xmr, out.ymr, out.xsd, out.ysd);
+Draw_traj(out.x,out.y,out.theta, out.xe,out.ye,out.thetae,...
+    out.xmr, out.ymr,out.thetamr, out.xsd, out.ysd,out.thetasd,...
+    out.xmr_delta, out.ymr_delta,out.thetamr_delta);
    
 figure 
 subplot(2,1,1);
@@ -84,7 +86,7 @@ plot(t, out.v, 'k','LineWidth', 2);
 hold on; grid on;
 plot(t, out.ve, 'r--','LineWidth', 2);
 plot(t, out.vmr, 'b','LineWidth', 2);
-plot(t, out.vsd,'LineWidth', 2);
+plot(t, out.vsd,'color','#D95319','LineWidth', 2);
 l = legend('$v$ Continuous-time', '$v$ Emulation', '$v$ MR Sampling', '$v$ SR Sampling');
 set(l,'Interpreter','Latex'); l.FontSize = 20;
 l = xlabel('Time (s)'); 
@@ -96,7 +98,7 @@ plot(t, out.w, 'k','LineWidth', 2);
 hold on; grid on;
 plot(t, out.we, 'r--','LineWidth', 2);
 plot(t, out.wmr, 'b','LineWidth', 2);
-plot(t, out.wsd,'LineWidth', 2);
+plot(t, out.wsd,'color','#D95319','LineWidth', 2);
 l = legend( '\omega Continuous time', '\omega Emulation', '\omega MR Sampling', '\omega SR Sampling');
 set(l,'Interpreter','Latex'); l.FontSize = 20;
 l = xlabel('Time (s)'); 
@@ -104,7 +106,9 @@ set(l,'Interpreter','Latex'); l.FontSize = 20;
 
 
 
-function Draw_traj(x,y,xe,ye, xmr, ymr, xsd, ysd)
+function Draw_traj(x,y,theta,...
+                   xe,ye, thetae, xmr, ymr,thetamr,...
+                   xsd, ysd,thetasd, xmr_delta, ymr_delta, thetamr_delta)
 
 
 set(0,'DefaultAxesFontName', 'Times New Roman')
@@ -112,39 +116,63 @@ set(0,'DefaultAxesFontSize', 12)
 line_width = 1.5;
 fontsize_labels = 14;
 
-x_c_1 = [];  x_e_1 = [];  x_mr_1 = []; x_sd_1 = [];
-y_c_1 = [];  y_e_1 = [];  y_mr_1 = []; y_sd_1 = [];
+x_c_1 = [];  x_e_1 = [];  x_mr_1 = []; x_sd_1 = []; xmr_delta_1 = [];
+y_c_1 = [];  y_e_1 = [];  y_mr_1 = []; y_sd_1 = []; ymr_delta_1 = [];
 
 figure('Name','Path following trajectories')
 set(gcf,'PaperPositionMode','auto')
 set(gcf, 'Color', 'w');
 set(gcf,'Units','normalized','OuterPosition',[0 0 0.55 1]);
+
+unicycle_size=0.4;
+vertices_unicycle_shape=unicycle_size*[[-0.25;-0.5;1/unicycle_size],...
+    [0.7;0;1/unicycle_size],[-0.25;0.5;1/unicycle_size]];
+faces_unicycle_shape=[1 2 3];
+
+
 for k = 1:50:size(x,1)
-    x1 = x(k); y1 = y(k); xe1 = xe(k);  ye1 = ye(k); xmr1 = xmr(k);  ymr1 = ymr(k); xsd1 = xsd(k);  ysd1 = ysd(k);
+    x1 = x(k); y1 = y(k); theta1 = theta(k); xe1 = xe(k);  ye1 = ye(k); thetae1 = thetae(k); 
+    xmr1 = xmr(k);  ymr1 = ymr(k); thetamr1 = thetamr(k); xsd1 = xsd(k);  ysd1 = ysd(k);
+    thetasd1 = thetasd(k); xmr_delta1 = xmr_delta(k);  ymr_delta1 = ymr_delta(k); thetamr_delta1 = thetamr_delta(k);
     x_c_1 = [x_c_1 x1]; x_e_1 = [x_e_1 xe1]; x_mr_1 = [x_mr_1 xmr1]; x_sd_1 = [x_sd_1 xsd1];
     y_c_1 = [y_c_1 y1]; y_e_1 = [y_e_1 ye1]; y_mr_1 = [y_mr_1 ymr1]; y_sd_1 = [y_sd_1 ysd1];
+    xmr_delta_1 = [xmr_delta_1 xmr_delta1];  ymr_delta_1 = [ymr_delta_1 ymr_delta1];
     scatter(x(1),y(1),'k','diamond', 'LineWidth', 5);
     hold on;
     c = plot(x_c_1,y_c_1,'-k','linewidth',line_width);hold on % 
-    plot(x1,y1,'-sk','MarkerSize',20, ...
-        'MarkerEdgeColor','black',...
-        'MarkerFaceColor',[0 0 0]);
+    M=[cos(theta1) -sin(theta1) x1; sin(theta1) cos(theta1)  y1;0 0 1]; 
+    vertices_unicycle_shape_0=(M*vertices_unicycle_shape)';
+    vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
+    patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
+    'FaceColor','k','EdgeColor','k','EraseMode','none');
     e = plot(x_e_1,y_e_1,'-r','linewidth',line_width);    
-    plot(xe1,ye1,'-sk','MarkerSize',20, ...
-        'MarkerEdgeColor','red',...
-        'MarkerFaceColor',[1 .6 .6]);
+    Me=[cos(thetae1) -sin(thetae1) xe1; sin(thetae1) cos(thetae1)  ye1;0 0 1]; 
+    vertices_unicycle_shape_0=(Me*vertices_unicycle_shape)';
+    vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
+    patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
+    'FaceColor','r','EdgeColor','k','EraseMode','none');
     mr = plot(x_mr_1,y_mr_1,'-b','linewidth',line_width);    
-    plot(xmr1,ymr1,'-sk','MarkerSize',20, ...
-        'MarkerEdgeColor','red',...
-        'MarkerFaceColor',[0 .1 .9]);
+    Mmr=[cos(thetamr1) -sin(thetamr1) xmr1; sin(thetamr1) cos(thetamr1)  ymr1;0 0 1]; 
+    vertices_unicycle_shape_0=(Mmr*vertices_unicycle_shape)';
+    vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
+    patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
+    'FaceColor','b','EdgeColor','k','EraseMode','none');
+    mrd = plot(xmr_delta_1,ymr_delta_1,'-g','linewidth',line_width);    
+    Mmrd=[cos(thetamr_delta1) -sin(thetamr_delta1) xmr_delta1; sin(thetamr_delta1) cos(thetamr_delta1)  ymr_delta1;0 0 1]; 
+    vertices_unicycle_shape_0=(Mmrd*vertices_unicycle_shape)';
+    vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
+    patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
+    'FaceColor','g','EdgeColor','k','EraseMode','none');
     sd = plot(x_sd_1,y_sd_1,'color','#D95319','linewidth',line_width);    
-    plot(xsd1,ysd1,'-sk','MarkerSize',20, ...
-        'MarkerEdgeColor','red',...
-        'MarkerFaceColor',[0.7 .4 .1]);
+    Msd=[cos(thetasd1) -sin(thetasd1) xsd1; sin(thetasd1) cos(thetasd1)  ysd1;0 0 1]; 
+    vertices_unicycle_shape_0=(Msd*vertices_unicycle_shape)';
+    vertices_unicycle_shape_0=vertices_unicycle_shape_0(:,1:2);
+    patch('Faces',faces_unicycle_shape,'Vertices',vertices_unicycle_shape_0,...
+    'FaceColor','#D95319','EdgeColor','k','EraseMode','none');
     hold off
     ylabel('$y$-position (m)','interpreter','latex','FontSize',fontsize_labels);
     xlabel('$x$-position (m)','interpreter','latex','FontSize',fontsize_labels);
-    legend([c e mr sd],'Continuous time','Emulation', 'MR Sampling','SR Sampling' ,'latex','FontSize',fontsize_labels);
+    legend([c e mr mrd sd],'Continuous time','Emulation', 'MR Sampling', 'MR Sampling $y^\delta$','SR Sampling' ,'latex','FontSize',fontsize_labels);
     axis([-5 5 -5 5])
     pause(0.05)
     box on;
@@ -152,7 +180,5 @@ for k = 1:50:size(x,1)
     drawnow
 end
 end
-
-
 
 
