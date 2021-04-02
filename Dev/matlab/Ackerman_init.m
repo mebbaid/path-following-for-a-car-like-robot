@@ -69,8 +69,8 @@ end
 %--------------------------- SIMULATION ------------------------------%
 %---------------------------------------------------------------------%
 
-% out = sim('Ackeraman.slx');
-out = sim('AcermanDynExt.slx');
+out = sim('Ackeraman.slx');
+% out = sim('AcermanDynExt.slx');
 
 
 t = 0:10^-3:simTime;
@@ -198,7 +198,7 @@ for k = 1:50:size(x,1)
     xlabel('$x$-position (m)','interpreter','latex','FontSize',fontsize_labels);
     legend([c e mr mrd sd],'Continuous time','Emulation', 'MR Sampling', 'MR Sampling $y^\delta$','SR Sampling' ,'latex','FontSize',fontsize_labels);
     axis([-5 5 -5 5])
-    pause(T/2)
+    pause(T/3)
     box on;
     grid on
     drawnow
